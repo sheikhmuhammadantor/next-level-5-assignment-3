@@ -112,3 +112,76 @@ booksRoutes.get("/:bookId", async (req: Request, res: Response) => {
     });
   }
 });
+
+booksRoutes.put("/:bookId", async (req: Request, res: Response) => {
+  try {
+    const { bookId } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(bookId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid book ID format",
+      });
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedBook) {
+      res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Book updated successfully",
+      data: updatedBook,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update book",
+      error: error.message,
+    });
+  }
+});
+
+booksRoutes.delete("/:bookId", async (req: Request, res: Response) => {
+  try {
+    const { bookId } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(bookId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid book ID format",
+      });
+    }
+
+    const deleted = await Book.findByIdAndDelete(bookId);
+
+    if (!deleted) {
+      res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Book deleted successfully",
+      data: null,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete book",
+      error: error.message,
+    });
+  }
+});
