@@ -82,7 +82,6 @@ booksRoutes.get("/:bookId", async (req: Request, res: Response) => {
   try {
     const { bookId } = req.params;
 
-    // Validate ObjectId;
     if (!mongoose.Types.ObjectId.isValid(bookId)) {
       res.status(400).json({
         success: false,

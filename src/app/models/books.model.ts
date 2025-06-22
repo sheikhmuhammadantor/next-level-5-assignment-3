@@ -1,5 +1,6 @@
-import { Model, Schema, model } from "mongoose";
-import { IBook } from "../interfaces/books.interface";
+import { Schema, model } from "mongoose";
+import { BookModel, IBook } from "../interfaces/books.interface";
+import { Borrow } from "./borrow.model";
 
 const bookSchema = new Schema<IBook>(
   {
@@ -60,10 +61,14 @@ bookSchema.statics.updateAvailability = async function (bookId: string) {
   }
 };
 
-interface BookModel extends Model<IBook> {
-  updateAvailability(bookId: string): Promise<void>;
-}
+bookSchema.pre("findOneAndDelete", async function (next) {
+  const bookBeingDeleted = await this.model.findOne(this.getQuery());
+
+  if (bookBeingDeleted) {
+    await Borrow.deleteMany({ book: bookBeingDeleted._id });
+  }
+
+  next();
+});
 
 export const Book = model<IBook, BookModel>("Book", bookSchema);
-
-// export const Book = model<IBook>("Book", bookSchema);
